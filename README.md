@@ -1,29 +1,43 @@
-# github-actions-workflow-template
+# merge-template-workflow
 
-This repository is a template for creating reusable GitHub Actions Workflows. Go through the below checklist
-upon instantiating this template:
-- Rename and replace the content of [the placeholder](.github/workflows/reusable-workflow.yaml) for your reusable workflow.
-- Edit this section and the usage section and replace with a meaningful description of your workflow
+This repository offers a reusable workflow to merge template repositories. It is meant to be used in a `workflow_dispatch`
+event.
+
+It infers the template repository of the calling repository and merges its latest version from its default
+branch into a new merge branch. When there are conflicts, the conflicting files are stored in a separate commit
+for later review.
+
+The merge branch is then opened as a pull request using the provided PAT so that it triggers other workflows.
+The merge branch is automatically approved and auto-merge is enabled on it as well.
+
+Updates without conflicts get automatically merged.
 
 ## Usage
 
 ```yaml
-name: Template Usage
+name: Update From Template
 
 on:
-  push: ~
+  workflow_dispatch:
+    inputs:
+      labels:
+        description:
+          A stringified JSON array of labels to apply to the PR.
+        required: false
+        default: '[]'
+        type: string
 
-# This needs to be a superset of what your workflow requires
 permissions:
-  pull-requests: read
+  # Required to approve pull request with GITHUB_TOKEN
+  pull-requests: write
 
 jobs:
-  example-job:
-    uses: infrastructure-blocks/github-actions-workflow-template/.github/workflows/reusable-workflow.yml@v1
+  merge-template:
+    uses: infrastructure-blocks/merge-template-workflow/.github/workflows/merge-template.yml@v1
     with:
-      example-input: Nobody cares
+      labels: ${{ inputs.labels }}
     secrets:
-      example-secret: ${{ secrets.EXAMPLE }}
+      github-pat: ${{ secrets.PAT }}
 ```
 
 ### Releasing
