@@ -33,6 +33,10 @@ concurrency:
 jobs:
   merge-template:
     runs-on: ubuntu-22.04
+    outputs:
+      needs-pull-request: ${{ steps.merge-template-branch.outputs.needs-pull-request}}
+      date: ${{ steps.merge-template-branch.outputs.date }}
+      branch: ${{ steps.merge-template-branch.outputs.branch }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -76,17 +80,26 @@ jobs:
           date=$(date +'%Y-%m-%d')
           branch_name="template-update/${date}"
           
+          base_sha=$(git rev-parse HEAD)
           git remote add template https://github.com/${{ steps.infer-template-repository.outputs.template-repository }}.git
           git fetch --all          
           git checkout -b "${branch_name}"
           
           # If the exit code is 1, we had conflicts.
-          exit_code=0
-          git merge template/master --allow-unrelated-histories --no-edit || exit_code=$?
+          merge_exit_code=0
+          git merge template/master --allow-unrelated-histories --no-edit || merge_exit_code=$?
+          
+          # If we are already up to date, we simply quit here.
+          source_sha=$(git rev-parse HEAD)
+          if [[ "${base_sha}" == "${source_sha}" ]]; then
+            echo "::debug::already up to date, SHA: ${base_sha}"
+            echo "needs-pull-request=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
           
           # In the event of a conflict, we merge the files that are fine and we create a new commit with conflicting
           # files.
-          if [[ $exit_code -ne 0 ]]; then
+          if [[ $merge_exit_code -ne 0 ]]; then
             mapfile -t unmerged_files < <( git diff --name-only --diff-filter=U --relative )
             # Add the tracked files so we can stash them.
             git add -u
@@ -102,17 +115,22 @@ jobs:
 
           git push origin --force "${branch_name}"
           
+          echo "needs-pull-request=true" >> "${GITHUB_OUTPUT}"
           echo "date=${date}" >> "${GITHUB_OUTPUT}"
           echo "branch=${branch_name}" >> "${GITHUB_OUTPUT}"
+  provision-pull-request:
+    if: ${{ jobs.merge-template.outputs.needs-pull-request == "true" }}
+    runs-on: ubuntu-22.04
+    steps:
       # Create pull request using the PAT to trigger pull_request workflows. GITHUB_TOKEN won't trigger
       # these jobs: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
       - name: Create Pull Request
         id: create-pull-request
         uses: infrastructure-blocks/create-pull-request-action@v1
         with:
-          head: ${{ steps.merge-template-branch.outputs.branch }}
+          head: ${{ jobs.merge-template.outputs.branch }}
           base: master
-          title: Update from template - ${{ steps.merge-template-branch.outputs.date }}
+          title: Update from template - ${{ jobs.merge-template.outputs.date }}
           github-token: ${{ secrets.github-pat }}
       - name: Label pull request
         run: |
