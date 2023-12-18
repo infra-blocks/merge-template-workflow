@@ -37,6 +37,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.github-pat }}
+          # Fetching all the tree to get correct merge conflict resolutions.
+          fetch-dept: 0
       - name: Get PAT credentials
         id: get-pat-credentials
         run: |
@@ -110,7 +112,7 @@ jobs:
         with:
           head: ${{ steps.merge-template-branch.outputs.branch }}
           base: master
-          title: Update from template - ${{ steps.merge-template.branch.outputs.date }}
+          title: Update from template - ${{ steps.merge-template-branch.outputs.date }}
           github-token: ${{ secrets.github-pat }}
       - name: Label pull request
         run: |
