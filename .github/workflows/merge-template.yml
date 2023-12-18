@@ -37,6 +37,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.github-pat }}
+          # Fetching all the tree to get correct merge conflict resolutions.
+          fetch-dept: 0
       - name: Get PAT credentials
         id: get-pat-credentials
         run: |
