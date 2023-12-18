@@ -121,7 +121,7 @@ jobs:
   provision-pull-request:
     needs:
       - merge-template
-    if: ${{ needs.merge-template.outputs.needs-pull-request == "true" }}
+    if: ${{ needs.merge-template.outputs.needs-pull-request == 'true' }}
     runs-on: ubuntu-22.04
     steps:
       # Create pull request using the PAT to trigger pull_request workflows. GITHUB_TOKEN won't trigger
