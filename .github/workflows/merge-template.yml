@@ -110,7 +110,7 @@ jobs:
         with:
           head: ${{ steps.merge-template-branch.outputs.branch }}
           base: master
-          title: Update from template - ${{ steps.merge-template.branch.outputs.date }}
+          title: Update from template - ${{ steps.merge-template-branch.outputs.date }}
           github-token: ${{ secrets.github-pat }}
       - name: Label pull request
         run: |
