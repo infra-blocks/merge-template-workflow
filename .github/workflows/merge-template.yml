@@ -119,7 +119,9 @@ jobs:
           echo "date=${date}" >> "${GITHUB_OUTPUT}"
           echo "branch=${branch_name}" >> "${GITHUB_OUTPUT}"
   provision-pull-request:
-    if: ${{ jobs.merge-template.outputs.needs-pull-request == "true" }}
+    needs:
+      - merge-template
+    if: ${{ needs.merge-template.outputs.needs-pull-request == "true" }}
     runs-on: ubuntu-22.04
     steps:
       # Create pull request using the PAT to trigger pull_request workflows. GITHUB_TOKEN won't trigger
@@ -128,9 +130,9 @@ jobs:
         id: create-pull-request
         uses: infrastructure-blocks/create-pull-request-action@v1
         with:
-          head: ${{ jobs.merge-template.outputs.branch }}
+          head: ${{ needs.merge-template.outputs.branch }}
           base: master
-          title: Update from template - ${{ jobs.merge-template.outputs.date }}
+          title: Update from template - ${{ needs.merge-template.outputs.date }}
           github-token: ${{ secrets.github-pat }}
       - name: Label pull request
         run: |
