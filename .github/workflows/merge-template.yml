@@ -35,6 +35,7 @@ jobs:
     runs-on: ubuntu-22.04
     outputs:
       needs-pull-request: ${{ steps.merge-template-branch.outputs.needs-pull-request}}
+      has-conflicts: ${{ steps.merge-template-branch.outputs.has-conflicts }}
       date: ${{ steps.merge-template-branch.outputs.date }}
       branch: ${{ steps.merge-template-branch.outputs.branch }}
     steps:
@@ -79,43 +80,56 @@ jobs:
           
           date=$(date +'%Y-%m-%d')
           branch_name="template-update/${date}"
+          echo "date=${date}" >> "${GITHUB_OUTPUT}"
+          echo "branch=${branch_name}" >> "${GITHUB_OUTPUT}"
           
           base_sha=$(git rev-parse HEAD)
           git remote add template https://github.com/${{ steps.infer-template-repository.outputs.template-repository }}.git
           git fetch --all          
           git checkout -b "${branch_name}"
           
-          # If the exit code is 1, we had conflicts.
+          # Capture the exit code to determine if there were we had conflicts. Non 0 means merge conflicts.
           merge_exit_code=0
           git merge template/master --allow-unrelated-histories --no-edit || merge_exit_code=$?
-          source_sha=$(git rev-parse HEAD)
           
-          # In the event of a conflict, we merge the files that are fine and we create a new commit with conflicting
-          # files.
-          if [[ $merge_exit_code -ne 0 ]]; then
-            mapfile -t unmerged_files < <( git diff --name-only --diff-filter=U --relative )
-            # Add the tracked files so we can stash them.
-            git add -u
-            # Stash them.
-            git stash -- "${unmerged_files[@]}"
-            # Conclude the merge
-            git commit --no-edit
-            # Create a commit specific with conflicting files.
-            git stash pop
-            git add -u
-            git commit -m "CONFLICTS"
-          # If the merge succeeded and we are already up to date, we simply quit here.
-          elif [[ "${base_sha}" == "${source_sha}" ]]; then            
-            echo "::debug::already up to date, SHA: ${base_sha}"
-            echo "needs-pull-request=false" >> "${GITHUB_OUTPUT}"
+          # No merge conflicts.
+          if [[ $merge_exit_code -eq 0 ]]; then
+            echo "has-conflicts=false" >> "${GITHUB_OUTPUT}"
+          
+            # If there are no changes.
+            source_sha=$(git rev-parse HEAD)
+            if [[ "${base_sha}" == "${source_sha}" ]]; then
+              echo "::debug::already up to date, SHA: ${base_sha}"
+              echo "needs-pull-request=false" >> "${GITHUB_OUTPUT}"
+              exit 0
+            fi
+            
+            # If there are changes, but no conflicts.
+            git push origin --force "${branch_name}"
+          
+            echo "needs-pull-request=true" >> "${GITHUB_OUTPUT}"
             exit 0
           fi
-          
+
+          # Otherwise, we have a conflict on our hands.
+          echo "has-conflicts=true" >> "${GITHUB_OUTPUT}"
+          # We merge the files that are fine and we create a new commit with conflicting
+          # files.
+          mapfile -t unmerged_files < <( git diff --name-only --diff-filter=U --relative )
+          # Add the tracked files so we can stash them.
+          git add -u
+          # Stash them.
+          git stash -- "${unmerged_files[@]}"
+          # Conclude the merge
+          git commit --no-edit
+          # Create a commit specific with conflicting files.
+          git stash pop
+          git add -u
+          git commit -m "CONFLICTS"
+        
           git push origin --force "${branch_name}"
           
           echo "needs-pull-request=true" >> "${GITHUB_OUTPUT}"
-          echo "date=${date}" >> "${GITHUB_OUTPUT}"
-          echo "branch=${branch_name}" >> "${GITHUB_OUTPUT}"
   provision-pull-request:
     needs:
       - merge-template
@@ -148,11 +162,14 @@ jobs:
           done
   
           GH_TOKEN=${{ secrets.github-pat }} gh pr edit ${{ fromJson(steps.create-pull-request.outputs.pull-request).number }} --repo ${{ github.repository }} "${labels_args[@]}"
-      - name: Turn on auto merge
+      # Because it's possible the merge conflicts pass the required checks, we don't auto merge.
+      - if: ${{ needs.merge-template.outputs.has-conflicts != 'true' }}
+        name: Turn on auto merge
         uses: infrastructure-blocks/enable-auto-merge-action@v1
         with:
           github-token: ${{ secrets.github-pat }}
           pull-request: ${{ fromJson(steps.create-pull-request.outputs.pull-request).node_id }}
-      - name: Approve PR through github actions bot
+      - if: ${{ needs.merge-template.outputs.has-conflicts != 'true' }}
+        name: Approve PR through github actions bot
         run: |
           GH_TOKEN=${{ github.token }} gh pr review ${{ fromJson(steps.create-pull-request.outputs.pull-request).number }} --repo ${{ github.repository }} --approve 
