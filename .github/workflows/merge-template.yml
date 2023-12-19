@@ -88,14 +88,7 @@ jobs:
           # If the exit code is 1, we had conflicts.
           merge_exit_code=0
           git merge template/master --allow-unrelated-histories --no-edit || merge_exit_code=$?
-          
-          # If we are already up to date, we simply quit here.
           source_sha=$(git rev-parse HEAD)
-          if [[ "${base_sha}" == "${source_sha}" ]]; then
-            echo "::debug::already up to date, SHA: ${base_sha}"
-            echo "needs-pull-request=false" >> "${GITHUB_OUTPUT}"
-            exit 0
-          fi
           
           # In the event of a conflict, we merge the files that are fine and we create a new commit with conflicting
           # files.
@@ -111,8 +104,13 @@ jobs:
             git stash pop
             git add -u
             git commit -m "CONFLICTS"
+          # If the merge succeeded and we are already up to date, we simply quit here.
+          elif [[ "${base_sha}" == "${source_sha}" ]]; then            
+            echo "::debug::already up to date, SHA: ${base_sha}"
+            echo "needs-pull-request=false" >> "${GITHUB_OUTPUT}"
+            exit 0
           fi
-
+          
           git push origin --force "${branch_name}"
           
           echo "needs-pull-request=true" >> "${GITHUB_OUTPUT}"
