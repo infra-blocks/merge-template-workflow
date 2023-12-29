@@ -54,7 +54,7 @@ jobs:
             https://api.github.com/user | jq '.login')
           email="${username}@users.noreply.github.com"
           echo "username=${username}" >> "${GITHUB_OUTPUT}"
-          echo "email=${username}" >> "${GITHUB_OUTPUT}"
+          echo "email=${email}" >> "${GITHUB_OUTPUT}"
       - name: Infer template repository
         id: infer-template-repository
         run: |
