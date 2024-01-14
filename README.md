@@ -12,6 +12,33 @@ The merge branch is automatically approved and auto-merge is enabled on it as we
 
 Updates without conflicts get automatically merged.
 
+## Inputs
+
+|        Name         | Required | Description                                                                                                                                     |
+|:-------------------:|:--------:|-------------------------------------------------------------------------------------------------------------------------------------------------|
+| template-repository |  false   | The template repository to merge into the calling repository. The default is to infer by querying the current repository's template repository. |
+|      labels         |  fale    | A stringified JSON array of the labels to apply to the new PR. The values are label names. The default is "[]"                                  | 
+
+## Secrets
+
+|    Name    | Required | Description                                                                                                                                                                                                                                                                    |
+|:----------:|:--------:|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| github-pat |   true   | The personal access token used to configure the git cli and make API calls to GitHub. The operations include fetching the template repository's code, listing the organization's repositories and opening a pull request. The approval is done through the Github Actions bot. |
+
+## Outputs
+
+N/A
+
+## Permissions
+
+|     Scope     | Level | Reason                                                                    |
+|:-------------:|:-----:|---------------------------------------------------------------------------|
+| pull-requests | write | To approve the newly created pull request through the GitHub Actions bot. |
+
+## Concurrency controls
+
+Describe concurrency controls of the workflow.
+
 ## Usage
 
 ```yaml
