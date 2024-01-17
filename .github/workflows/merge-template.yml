@@ -165,10 +165,10 @@ jobs:
       # Because it's possible the merge conflicts pass the required checks, we don't auto merge.
       - if: ${{ needs.merge-template.outputs.has-conflicts != 'true' }}
         name: Turn on auto merge
-        uses: infrastructure-blocks/enable-auto-merge-action@v1
+        uses: infrastructure-blocks/enable-auto-merge-action@v2
         with:
-          github-token: ${{ secrets.github-pat }}
-          pull-request: ${{ fromJson(steps.create-pull-request.outputs.pull-request).node_id }}
+          github-pat: ${{ secrets.github-pat }}
+          node-id: ${{ fromJson(steps.create-pull-request.outputs.pull-request).node_id }}
       - if: ${{ needs.merge-template.outputs.has-conflicts != 'true' }}
         name: Approve PR through github actions bot
         run: |
