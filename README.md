@@ -37,7 +37,14 @@ N/A
 
 ## Concurrency controls
 
-Describe concurrency controls of the workflow.
+|       Field        |                  Value                   |
+|:------------------:|:----------------------------------------:|
+|       group        | ${{ github.workflow }}-${{ github.ref }} |
+| cancel-in-progress |                   true                   |
+
+## Timeouts
+
+N/A
 
 ## Usage
 
@@ -60,7 +67,7 @@ permissions:
 
 jobs:
   merge-template:
-    uses: infrastructure-blocks/merge-template-workflow/.github/workflows/merge-template.yml@v1
+    uses: infrastructure-blocks/merge-template-workflow/.github/workflows/workflow.yml@v1
     with:
       labels: ${{ inputs.labels }}
     secrets:
