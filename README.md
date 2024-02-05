@@ -1,4 +1,6 @@
 # merge-template-workflow
+[![Git Tag Semver From Label](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/git-tag-semver-from-label.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/git-tag-semver-from-label.yml)
+[![Update From Template](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/update-from-template.yml)
 
 This repository offers a reusable workflow to merge template repositories. It is meant to be used in a `workflow_dispatch`
 event.
@@ -17,7 +19,7 @@ Updates without conflicts get automatically merged.
 |        Name         | Required | Description                                                                                                                                     |
 |:-------------------:|:--------:|-------------------------------------------------------------------------------------------------------------------------------------------------|
 | template-repository |  false   | The template repository to merge into the calling repository. The default is to infer by querying the current repository's template repository. |
-|      labels         |  fale    | A stringified JSON array of the labels to apply to the new PR. The values are label names. The default is "[]"                                  | 
+|       labels        |  false   | A stringified JSON array of the labels to apply to the new PR. The values are label names. The default is "[]"                                  | 
 
 ## Secrets
 
