@@ -16,6 +16,11 @@ on:
         type: string
         default: "[]"
         required: false
+      skip:
+        type: boolean
+        description: Whether to skip the workflow or not.
+        required: false
+        default: false
     secrets:
       github-pat:
         description: |
@@ -32,6 +37,7 @@ concurrency:
 
 jobs:
   merge-template:
+    if: ${{ !inputs.skip }}
     runs-on: ubuntu-22.04
     outputs:
       needs-pull-request: ${{ steps.merge-template-branch.outputs.needs-pull-request}}

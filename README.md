@@ -16,10 +16,11 @@ Updates without conflicts get automatically merged.
 
 ## Inputs
 
-|        Name         | Required | Description                                                                                                                                     |
-|:-------------------:|:--------:|-------------------------------------------------------------------------------------------------------------------------------------------------|
-| template-repository |  false   | The template repository to merge into the calling repository. The default is to infer by querying the current repository's template repository. |
-|       labels        |  false   | A stringified JSON array of the labels to apply to the new PR. The values are label names. The default is "[]"                                  | 
+|        Name         | Required | Description                                                                                                                                                                  |
+|:-------------------:|:--------:|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| template-repository |  false   | The template repository to merge into the calling repository. The default is to infer by querying the current repository's template repository.                              |
+|       labels        |  false   | A stringified JSON array of the labels to apply to the new PR. The values are label names. The default is "[]"                                                               | 
+|        skip         |  false   | A boolean indicating whether to skip the workflow. This is to workaround the required checks discrepancy when the workflow is skipped from the caller. It defaults to false. |
 
 ## Secrets
 
