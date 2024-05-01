@@ -36,8 +36,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+<<<<<<< HEAD
   merge-template:
     if: ${{ !inputs.skip }}
+=======
+  example-job:
+>>>>>>> template/master
     runs-on: ubuntu-22.04
     outputs:
       needs-pull-request: ${{ steps.merge-template-branch.outputs.needs-pull-request}}
@@ -45,6 +49,7 @@ jobs:
       date: ${{ steps.merge-template-branch.outputs.date }}
       branch: ${{ steps.merge-template-branch.outputs.branch }}
     steps:
+<<<<<<< HEAD
       - uses: actions/checkout@v4
         with:
           token: ${{ secrets.github-pat }}
@@ -52,6 +57,14 @@ jobs:
           fetch-depth: 0
       - name: Get PAT credentials
         id: get-pat-credentials
+=======
+      # This condition should be on every step.
+      - if: ${{ !inputs.skip }}
+        id: example-step
+        name: Example step
+        env:
+          BIG_SECRET: ${{ secrets.example-secret }}
+>>>>>>> template/master
         run: |
           username=$(curl -s -L \
             -H "Accept: application/vnd.github+json" \
