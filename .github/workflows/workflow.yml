@@ -37,7 +37,6 @@ concurrency:
 
 jobs:
   merge-template:
-    if: ${{ !inputs.skip }}
     runs-on: ubuntu-22.04
     outputs:
       needs-pull-request: ${{ steps.merge-template-branch.outputs.needs-pull-request}}
@@ -45,12 +44,14 @@ jobs:
       date: ${{ steps.merge-template-branch.outputs.date }}
       branch: ${{ steps.merge-template-branch.outputs.branch }}
     steps:
-      - uses: actions/checkout@v4
+      - if: ${{ !inputs.skip }}
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.github-pat }}
           # Fetching all the tree to get correct merge conflict resolutions.
           fetch-depth: 0
-      - name: Get PAT credentials
+      - if: ${{ !inputs.skip }}
+        name: Get PAT credentials
         id: get-pat-credentials
         run: |
           username=$(curl -s -L \
@@ -61,7 +62,8 @@ jobs:
           email="${username}@users.noreply.github.com"
           echo "username=${username}" >> "${GITHUB_OUTPUT}"
           echo "email=${email}" >> "${GITHUB_OUTPUT}"
-      - name: Infer template repository
+      - if: ${{ !inputs.skip }}
+        name: Infer template repository
         id: infer-template-repository
         run: |
           if [[ -n "${{ inputs.template-repository }}" ]]
@@ -77,7 +79,8 @@ jobs:
           template="${owner}/${repo}"
           echo "::debug::inferred template repository to ${template}"
           echo "template-repository=${template}" >> "${GITHUB_OUTPUT}"
-      - name: Create template merge branch
+      - if: ${{ !inputs.skip }}
+        name: Create template merge branch
         id: merge-template-branch
         run: |
           # Configure git for upcoming commit operations
@@ -144,7 +147,8 @@ jobs:
     steps:
       # Create pull request using the PAT to trigger pull_request workflows. GITHUB_TOKEN won't trigger
       # these jobs: https://docs.github.com/en/actions/security-guides/automatic-token-authentication#using-the-github_token-in-a-workflow
-      - name: Create Pull Request
+      - if: ${{ !inputs.skip }}
+        name: Create Pull Request
         id: create-pull-request
         uses: infrastructure-blocks/create-pull-request-action@v1
         with:
@@ -152,7 +156,8 @@ jobs:
           base: master
           title: Update from template - ${{ needs.merge-template.outputs.date }}
           github-token: ${{ secrets.github-pat }}
-      - name: Label pull request
+      - if: ${{ !inputs.skip }}
+        name: Label pull request
         run: |
           labels_length=$(echo '${{ inputs.labels }}' | jq -r '. | length')
           if [[ $labels_length -eq 0 ]]; then
@@ -169,13 +174,13 @@ jobs:
           
           GH_TOKEN=${{ secrets.github-pat }} gh pr edit ${{ fromJson(steps.create-pull-request.outputs.pull-request).number }} --repo ${{ github.repository }} "${labels_args[@]}"
       # Because it's possible the merge conflicts pass the required checks, we don't auto merge.
-      - if: ${{ needs.merge-template.outputs.has-conflicts != 'true' }}
+      - if: ${{ !inputs.skip && needs.merge-template.outputs.has-conflicts != 'true' }}
         name: Turn on auto merge
         uses: infrastructure-blocks/enable-auto-merge-action@v2
         with:
           github-pat: ${{ secrets.github-pat }}
           node-id: ${{ fromJson(steps.create-pull-request.outputs.pull-request).node_id }}
-      - if: ${{ needs.merge-template.outputs.has-conflicts != 'true' }}
+      - if: ${{ !inputs.skip && needs.merge-template.outputs.has-conflicts != 'true' }}
         name: Approve PR through github actions bot
         run: |
           GH_TOKEN=${{ github.token }} gh pr review ${{ fromJson(steps.create-pull-request.outputs.pull-request).number }} --repo ${{ github.repository }} --approve 

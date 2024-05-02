@@ -1,5 +1,5 @@
 # merge-template-workflow
-[![Git Tag Semver From Label](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/git-tag-semver-from-label.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/git-tag-semver-from-label.yml)
+[![Release](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/release.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/release.yml)
 [![Update From Template](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/update-from-template.yml)
 
 This repository offers a reusable workflow to merge template repositories. It is meant to be used in a `workflow_dispatch`
