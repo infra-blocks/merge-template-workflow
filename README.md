@@ -1,6 +1,6 @@
 # merge-template-workflow
-[![Release](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/release.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/release.yml)
-[![Update From Template](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infrastructure-blocks/merge-template-workflow/actions/workflows/update-from-template.yml)
+[![Release](https://github.com/infra-blocks/merge-template-workflow/actions/workflows/release.yml/badge.svg)](https://github.com/infra-blocks/merge-template-workflow/actions/workflows/release.yml)
+[![Update From Template](https://github.com/infra-blocks/merge-template-workflow/actions/workflows/update-from-template.yml/badge.svg)](https://github.com/infra-blocks/merge-template-workflow/actions/workflows/update-from-template.yml)
 
 This repository offers a reusable workflow to merge template repositories. It is meant to be used in a `workflow_dispatch`
 event.
@@ -70,7 +70,7 @@ permissions:
 
 jobs:
   merge-template:
-    uses: infrastructure-blocks/merge-template-workflow/.github/workflows/workflow.yml@v1
+    uses: infra-blocks/merge-template-workflow/.github/workflows/workflow.yml@v1
     with:
       labels: ${{ inputs.labels }}
     secrets:
@@ -80,4 +80,4 @@ jobs:
 ### Releasing
 
 The releasing is handled at git level with semantic versioning tags. Those are automatically generated and managed
-by the [git-tag-semver-from-label-workflow](https://github.com/infrastructure-blocks/git-tag-semver-from-label-workflow).
+by the [git-tag-semver-from-label-workflow](https://github.com/infra-blocks/git-tag-semver-from-label-workflow).

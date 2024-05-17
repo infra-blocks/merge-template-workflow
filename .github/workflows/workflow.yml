@@ -150,7 +150,7 @@ jobs:
       - if: ${{ !inputs.skip }}
         name: Create Pull Request
         id: create-pull-request
-        uses: infrastructure-blocks/create-pull-request-action@v1
+        uses: infra-blocks/create-pull-request-action@v1
         with:
           head: ${{ needs.merge-template.outputs.branch }}
           base: master
@@ -176,7 +176,7 @@ jobs:
       # Because it's possible the merge conflicts pass the required checks, we don't auto merge.
       - if: ${{ !inputs.skip && needs.merge-template.outputs.has-conflicts != 'true' }}
         name: Turn on auto merge
-        uses: infrastructure-blocks/enable-auto-merge-action@v2
+        uses: infra-blocks/enable-auto-merge-action@v2
         with:
           github-pat: ${{ secrets.github-pat }}
           node-id: ${{ fromJson(steps.create-pull-request.outputs.pull-request).node_id }}
